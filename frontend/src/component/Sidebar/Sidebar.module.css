@@ -19,10 +19,23 @@
 
   --sb-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  position: relative;
+  /* FIX #1: sticky keeps the sidebar in view while long pages scroll.
+     (Was `position: relative` → sidebar scrolled away with the page.) */
+  position: sticky;
+  top: 0;
+
+  /* FIX #2: own stacking context so internal z-indexes (collapse
+     toggle, active indicator) never leak onto the page, and page
+     elements (modals at z: 100+) still render above the sidebar. */
+  z-index: 1;
+
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
+
+  /* FIX #3: safety when nested inside tight flex parents. */
+  min-width: 0;
+
   width: var(--sb-width);
   height: 100vh;
   height: 100dvh;
@@ -47,6 +60,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;                /* FIX #4: never squashed below 88px */
   min-height: 88px;
   padding: 0 20px;
   box-sizing: border-box;
@@ -156,12 +170,14 @@
    Dividers
    ============================================================ */
 .divider {
+  flex-shrink: 0;                /* FIX #4 */
   height: 1px;
   margin: 0 20px 24px;
   background: var(--sb-border);
 }
 
 .bottomDivider {
+  flex-shrink: 0;                /* FIX #4 */
   height: 1px;
   margin: 0 6px 14px;
   background: var(--sb-border);
@@ -183,6 +199,10 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: #2c3a55 transparent;
+
+  /* FIX #5: reserve gutter on both sides → nav labels never jump
+     6px when the scrollbar appears / disappears. */
+  scrollbar-gutter: stable both-edges;
 }
 
 .navigation::-webkit-scrollbar {
@@ -345,7 +365,8 @@
    ============================================================ */
 .sidebarBottom {
   flex-shrink: 0;
-  padding: 0 12px 16px;
+  /* FIX #6: respect iPhone home-indicator safe area */
+  padding: 0 12px calc(16px + env(safe-area-inset-bottom, 0px));
 }
 
 .logoutButton {
@@ -447,9 +468,11 @@
 @media (max-width: 960px) {
   .mobileToggle {
     position: fixed;
-    top: 14px;
-    left: 14px;
+    /* FIX #7: never hide under the iPhone notch / Android cutout */
+    top: max(14px, env(safe-area-inset-top, 0px));
+    left: max(14px, env(safe-area-inset-left, 0px));
     z-index: 70;
+
     display: grid;
     place-items: center;
     width: 44px;
@@ -470,12 +493,22 @@
 
   .sidebar,
   .sidebar.collapsed {
+    /* FIX #8: override the desktop `sticky` explicitly → drawer */
     position: fixed;
+    top: auto;                          /* clear sticky's top: 0 */
     inset-block: 0;
     inset-inline-start: 0;
     z-index: 90;
+
     width: min(288px, 84vw);
+    height: 100vh;
+    height: 100dvh;
+
     box-shadow: 0 20px 60px rgb(0 0 0 / 45%);
+
+    /* safe area for drawer content */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
 
     transform: translateX(-100%);
     visibility: hidden;

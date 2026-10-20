@@ -1,29 +1,36 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import styles from './Sidebar.module.css';
-import LogoutDialog from "../LogoutDialog/LogoutDialog"
 
-import { DocumentIcon } from '../../assets/icons/document';
-import { DashboardIcon } from '../../assets/icons/dashboardicon';
-import { HIstoryIcon } from '../../assets/icons/historyicon';
-import { AdminIcon } from '../../assets/icons/admin';
-import { LogoutIcon } from '../../assets/icons/logout';
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import styles from "./Sidebar.module.css";
+import LogoutDialog from "../LogoutDialog/LogoutDialog";
+import { useAuth } from "../../context/AuthContext";
+
+import { DocumentIcon } from "../../assets/icons/document";
+import { DashboardIcon } from "../../assets/icons/dashboardicon";
+import { HIstoryIcon } from "../../assets/icons/historyicon";
+import { AdminIcon } from "../../assets/icons/admin";
+import { LogoutIcon } from "../../assets/icons/logout";
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', icon: DashboardIcon, href: '/dashboard' },
-  { label: 'History', icon: HIstoryIcon, href: '/history' },
-  { label: 'Admin', icon: AdminIcon, href: '/admin' },
+  { label: "Dashboard", icon: DashboardIcon, href: "/dashboard" },
+  { label: "History", icon: HIstoryIcon, href: "/history" },
+  { label: "Admin", icon: AdminIcon, href: "/admin" },
 ];
 
-const isActiveRoute = (href, pathname) =>
-  pathname === href || pathname.startsWith(`${href}/`);
-
 const Sidebar = ({
-  activePath = '/dashboard',
+  activePath,
   navItems = NAV_ITEMS,
   onLogout,
   defaultCollapsed = false,
   onCollapsedChange,
 }) => {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentPath = activePath ?? location.pathname;
+
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -35,6 +42,19 @@ const Sidebar = ({
 
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
+  // Logout through AuthContext and then redirect to login.
+  const handleLogout = useCallback(async () => {
+    if (onLogout) {
+      await onLogout();
+    } else {
+      await logout();
+    }
+
+    setLogoutOpen(false);
+    setMobileOpen(false);
+    navigate("/login", { replace: true });
+  }, [logout, navigate, onLogout]);
+
   const toggleCollapsed = () => {
     const next = !collapsed;
     setCollapsed(next);
@@ -42,20 +62,22 @@ const Sidebar = ({
     onCollapsedChange?.(next);
   };
 
-  /* Mobile drawer: Escape, Tab trap, scroll lock */
+  // Mobile drawer keyboard controls and scroll lock.
   useEffect(() => {
     if (!mobileOpen) return undefined;
 
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setMobileOpen(false);
         return;
       }
-      if (event.key !== 'Tab') return;
+
+      if (event.key !== "Tab") return;
 
       const nodes = panelRef.current?.querySelectorAll(
         'a[href], button:not([disabled])'
       );
+
       if (!nodes?.length) return;
 
       const first = nodes[0];
@@ -64,45 +86,59 @@ const Sidebar = ({
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
         event.preventDefault();
         first.focus();
       }
     };
 
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener("keydown", onKeyDown);
+
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
   }, [mobileOpen]);
 
-  /* Focus in on open, back to the trigger on close */
+  // Focus management for the mobile drawer.
   useEffect(() => {
     if (mobileOpen) {
       wasOpenRef.current = true;
-      panelRef.current?.querySelector('a[href]')?.focus({ preventScroll: true });
+
+      panelRef.current
+        ?.querySelector("a[href]")
+        ?.focus({ preventScroll: true });
     } else if (wasOpenRef.current) {
       wasOpenRef.current = false;
       toggleRef.current?.focus({ preventScroll: true });
     }
   }, [mobileOpen]);
 
-  /* Navigate = drawer closes */
+  // Close mobile navigation when the route changes.
   useEffect(() => {
     setMobileOpen(false);
     setTooltip(null);
-  }, [activePath]);
+  }, [currentPath]);
 
-  /* Rail tooltips (fixed positioned → never clipped) */
+  // Rail tooltips.
   const showTooltip = (event, label) => {
     if (!collapsed) return;
+
     const rect = event.currentTarget.getBoundingClientRect();
-    setTooltip({ label, top: rect.top + rect.height / 2, left: rect.right + 14 });
+
+    setTooltip({
+      label,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 14,
+    });
   };
+
   const hideTooltip = () => setTooltip(null);
 
   return (
@@ -128,7 +164,11 @@ const Sidebar = ({
       </button>
 
       {mobileOpen && (
-        <div className={styles.backdrop} onClick={closeMobile} aria-hidden="true" />
+        <div
+          className={styles.backdrop}
+          onClick={closeMobile}
+          aria-hidden="true"
+        />
       )}
 
       <aside
@@ -136,17 +176,17 @@ const Sidebar = ({
         ref={panelRef}
         className={[
           styles.sidebar,
-          collapsed ? styles.collapsed : '',
-          mobileOpen ? styles.open : '',
+          collapsed ? styles.collapsed : "",
+          mobileOpen ? styles.open : "",
         ]
           .filter(Boolean)
-          .join(' ')}
+          .join(" ")}
       >
         <button
           type="button"
           className={styles.collapseToggle}
           onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -161,8 +201,8 @@ const Sidebar = ({
           </svg>
         </button>
 
-        <a
-          href="/dashboard"
+        <Link
+          to="/dashboard"
           className={styles.brand}
           aria-label="Resume Screening — go to dashboard"
           onClick={closeMobile}
@@ -170,11 +210,22 @@ const Sidebar = ({
           <span className={styles.brandIcon} aria-hidden="true">
             <DocumentIcon />
           </span>
+
           <span className={styles.brandText}>
-            <span className={styles.brandTitle}>Resume Screening</span>
-            <span className={styles.brandSubtitle}>SMART RECRUITMENT</span>
+            <span className={styles.brandTitle}>
+              Resume Screening
+            </span>
+            <span className={styles.brandSubtitle}>
+              SMART RECRUITMENT
+            </span>
           </span>
-        </a>
+        </Link>
+
+        {user && (
+          <div className={styles.userInfo}>
+            <span className={styles.navLabel}>{user.name}</span>
+          </div>
+        )}
 
         <div className={styles.divider} />
 
@@ -185,35 +236,45 @@ const Sidebar = ({
         >
           <p className={styles.sectionLabel}>WORKSPACE</p>
 
-          {navItems.map(({ label, icon: Icon, href, badge }) => {
-            const active = isActiveRoute(href, activePath);
+          {navItems.map(({ label, icon: Icon, href, badge }) => (
+            <NavLink
+              key={href}
+              to={href}
+              end={href === "/dashboard"}
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.active : ""
+                }`
+              }
+              onPointerEnter={(event) =>
+                showTooltip(event, label)
+              }
+              onPointerLeave={hideTooltip}
+              onFocus={(event) => showTooltip(event, label)}
+              onBlur={hideTooltip}
+              onClick={closeMobile}
+            >
+              {({ isActive }) => (
+                <>
+                  <span className={styles.navIcon} aria-hidden="true">
+                    <Icon />
+                  </span>
 
-            return (
-              <a
-                key={href}
-                href={href}
-                className={`${styles.navItem} ${active ? styles.active : ''}`}
-                aria-current={active ? 'page' : undefined}
-                onPointerEnter={(event) => showTooltip(event, label)}
-                onPointerLeave={hideTooltip}
-                onFocus={(event) => showTooltip(event, label)}
-                onBlur={hideTooltip}
-                onClick={closeMobile}
-              >
-                <span className={styles.navIcon} aria-hidden="true">
-                  <Icon />
-                </span>
+                  <span className={styles.navLabel}>{label}</span>
 
-                <span className={styles.navLabel}>{label}</span>
+                  {badge != null && (
+                    <span className={styles.badge}>{badge}</span>
+                  )}
 
-                {badge != null && <span className={styles.badge}>{badge}</span>}
-
-                {active && (
-                  <span className={styles.activeIndicator} aria-hidden="true" />
-                )}
-              </a>
-            );
-          })}
+                  {isActive && (
+                    <span
+                      className={styles.activeIndicator}
+                      aria-hidden="true"
+                    />
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
 
         <div className={styles.sidebarBottom}>
@@ -223,10 +284,19 @@ const Sidebar = ({
             type="button"
             className={styles.logoutButton}
             onClick={() => setLogoutOpen(true)}
+            onPointerEnter={(event) =>
+              showTooltip(event, "Logout")
+            }
+            onPointerLeave={hideTooltip}
+            onFocus={(event) =>
+              showTooltip(event, "Logout")
+            }
+            onBlur={hideTooltip}
           >
             <span className={styles.navIcon} aria-hidden="true">
               <LogoutIcon />
             </span>
+
             <span className={styles.navLabel}>Logout</span>
           </button>
         </div>
@@ -235,14 +305,20 @@ const Sidebar = ({
       <LogoutDialog
         open={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={onLogout}
+        onConfirm={handleLogout}
+        title="Log out of Resume Screening?"
+        description="You'll be returned to the sign-in screen. Any unsaved changes will be lost."
       />
 
       {tooltip && (
         <div
           className={styles.tooltip}
           role="tooltip"
-          style={{ top: tooltip.top, left: tooltip.left }}
+          style={{
+            top: tooltip.top,
+            left: tooltip.left,
+            transform: "translateY(-50%)",
+          }}
         >
           {tooltip.label}
         </div>

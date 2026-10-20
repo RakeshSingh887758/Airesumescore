@@ -1,17 +1,17 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import styles from './LogoutDialog.module.css';
+
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import styles from "./LogoutDialog.module.css";
 
 const LogoutDialog = ({
   open,
   onClose,
   onConfirm,
-  title = 'Log out of Resume Screening?',
-  description =
-    "You'll be returned to the sign-in screen. Any unsaved changes will be lost.",
+  title = "Log out of your account?",
+  description = "You'll need to sign in again to access your dashboard.",
 }) => {
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   const panelRef = useRef(null);
   const cancelRef = useRef(null);
@@ -20,66 +20,73 @@ const LogoutDialog = ({
   const titleId = useId();
   const descId = useId();
 
-  /* Reset state + remember the element that opened the dialog */
   useEffect(() => {
-    if (!open) return undefined;
-    setError(null);
+    if (!open) return;
+
+    setError("");
     setPending(false);
     openerRef.current = document.activeElement;
 
-    /* Default focus on the safe action, not the destructive one */
-    const raf = requestAnimationFrame(() =>
-      cancelRef.current?.focus({ preventScroll: true })
-    );
+    const raf = requestAnimationFrame(() => {
+      cancelRef.current?.focus({ preventScroll: true });
+    });
+
     return () => cancelAnimationFrame(raf);
   }, [open]);
 
-  /* Return focus to the trigger when the dialog closes */
   useEffect(() => {
-    if (open) return undefined;
+    if (open) return;
+
     const opener = openerRef.current;
-    if (opener instanceof HTMLElement) {
+
+    if (opener instanceof HTMLElement && opener.isConnected) {
       opener.focus({ preventScroll: true });
     }
-    return undefined;
   }, [open]);
 
-  /* Escape (capture phase → takes priority over the mobile drawer),
-     Tab trap, scroll lock */
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) return;
 
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
         if (pending) return;
+
         event.preventDefault();
         event.stopPropagation();
         onClose();
         return;
       }
-      if (event.key !== 'Tab') return;
 
-      const nodes = panelRef.current?.querySelectorAll('button:not([disabled])');
-      if (!nodes?.length) return;
+      if (event.key !== "Tab") return;
 
-      const first = nodes[0];
-      const last = nodes[nodes.length - 1];
+      const buttons = panelRef.current?.querySelectorAll(
+        "button:not([disabled])"
+      );
+
+      if (!buttons?.length) return;
+
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
 
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
         event.preventDefault();
         first.focus();
       }
     };
 
-    document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener("keydown", handleKeyDown, true);
+
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
       document.body.style.overflow = previousOverflow;
     };
   }, [open, pending, onClose]);
@@ -88,11 +95,12 @@ const LogoutDialog = ({
 
   const handleConfirm = async () => {
     if (pending) return;
-    setError(null);
+
+    setError("");
     setPending(true);
 
     try {
-      await onConfirm?.();
+      await onConfirm();
       onClose();
     } catch {
       setError(
@@ -102,12 +110,17 @@ const LogoutDialog = ({
     }
   };
 
-  const handleBackdrop = () => {
-    if (!pending) onClose();
+  const handleBackdrop = (event) => {
+    if (event.target === event.currentTarget && !pending) {
+      onClose();
+    }
   };
 
   return createPortal(
-    <div className={styles.overlay} onMouseDown={handleBackdrop}>
+    <div
+      className={styles.overlay}
+      onMouseDown={handleBackdrop}
+    >
       <div
         ref={panelRef}
         className={styles.dialog}
@@ -115,13 +128,11 @@ const LogoutDialog = ({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        onMouseDown={(event) => event.stopPropagation()}
       >
         <div className={styles.iconWrap} aria-hidden="true">
-          <svg viewBox="0 0 24 24">
+          <svg viewBox="0 0 24 24" fill="none">
             <path
               d="M15 17l5-5-5-5M20 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"
-              fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
@@ -133,6 +144,7 @@ const LogoutDialog = ({
         <h2 id={titleId} className={styles.title}>
           {title}
         </h2>
+
         <p id={descId} className={styles.description}>
           {description}
         </p>
@@ -162,11 +174,14 @@ const LogoutDialog = ({
           >
             {pending ? (
               <>
-                <span className={styles.spinner} aria-hidden="true" />
-                Signing out…
+                <span
+                  className={styles.spinner}
+                  aria-hidden="true"
+                />
+                Signing out...
               </>
             ) : (
-              'Log out'
+              "Log out"
             )}
           </button>
         </div>

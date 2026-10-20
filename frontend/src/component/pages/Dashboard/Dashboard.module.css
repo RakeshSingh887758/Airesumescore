@@ -1,0 +1,627 @@
+/* ============================================================
+   Dashboard.module.css
+   World-class dashboard UI — form-first left column,
+   results panel on the right, fully responsive.
+   ============================================================ */
+
+/* ---------- Design tokens ---------- */
+.Dashboard {
+  --d-bg: #f4f6fb;
+  --d-surface: #ffffff;
+  --d-surface-alt: #f8fafc;
+  --d-border: #e2e8f0;
+  --d-border-strong: #cbd5e1;
+
+  --d-text: #0f172a;
+  --d-text-muted: #64748b;
+  --d-text-soft: #94a3b8;
+
+  --d-accent: #6366f1;
+  --d-accent-strong: #4f46e5;
+  --d-accent-soft: #eef2ff;
+
+  --d-radius-lg: 20px;
+  --d-radius-md: 14px;
+  --d-radius-sm: 10px;
+
+  --d-shadow-sm: 0 1px 2px rgb(15 23 42 / 6%), 0 1px 3px rgb(15 23 42 / 4%);
+  --d-shadow-md: 0 8px 24px -12px rgb(15 23 42 / 14%), 0 2px 6px rgb(15 23 42 / 4%);
+  --d-shadow-lg: 0 24px 48px -24px rgb(15 23 42 / 22%);
+
+  --d-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Layout */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+
+  padding: 32px;
+  box-sizing: border-box;
+
+  background:
+    radial-gradient(circle at 0% 0%, rgb(99 102 241 / 7%), transparent 42%),
+    radial-gradient(circle at 100% 100%, rgb(139 92 246 / 6%), transparent 42%),
+    var(--d-bg);
+
+  color: var(--d-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   LEFT COLUMN
+   ============================================================ */
+.DashboardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* ---------- Header ---------- */
+.Dashboardheader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.Dashboardheadertitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--d-accent-soft);
+  border: 1px solid rgb(99 102 241 / 20%);
+  color: var(--d-accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.Dashboardheadertitle::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--d-accent);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 20%);
+}
+
+.Dashboardheaderlargetitle {
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  line-height: 1.08;
+  padding-bottom: 4px;
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--d-text);
+}
+
+/* ---------- Workspace / instruction card ---------- */
+.alertInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  border-radius: var(--d-radius-lg);
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  box-shadow: var(--d-shadow-sm);
+  min-width: 0;
+}
+
+/* The two plain instruction <div>s (no className in the JSX).
+   :not([class]) cleanly targets only them, not the wrapped blocks. */
+.alertInfo > div:not([class]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--d-radius-sm);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  color: var(--d-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* First instruction (🔔 Important Instruction) — emphasised */
+.alertInfo > div:not([class]):first-child {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fcd34d;
+  color: #78350f;
+  font-weight: 700;
+}
+
+/* The middle instruction — softer tip style */
+.DashboardInstruction {
+  padding: 14px 18px;
+  border-radius: var(--d-radius-sm);
+  background: linear-gradient(135deg, rgb(99 102 241 / 7%), rgb(99 102 241 / 2%));
+  border: 1px dashed rgb(99 102 241 / 35%);
+  color: var(--d-text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ---------- Upload resume ---------- */
+.DashboardUploadResume {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--d-radius-md);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  transition: border-color 180ms var(--d-ease);
+}
+
+.DashboardUploadResume:hover {
+  border-color: var(--d-border-strong);
+}
+
+.DashboarResumeBlock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--d-text);
+}
+
+.DashboarResumeBlock::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+}
+
+.DashboardinputField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.DashboardinputField label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--d-text-muted);
+}
+
+.DashboardinputField input[type='file'] {
+  width: 100%;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border-radius: var(--d-radius-sm);
+  border: 1.5px dashed var(--d-border-strong);
+  background: var(--d-surface);
+  color: var(--d-text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 180ms var(--d-ease),
+    background-color 180ms var(--d-ease);
+}
+
+.DashboardinputField input[type='file']:hover {
+  border-color: var(--d-accent);
+  background: var(--d-accent-soft);
+}
+
+.DashboardinputField input[type='file']:focus-visible {
+  outline: none;
+  border-color: var(--d-accent);
+  border-style: solid;
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 15%);
+}
+
+.DashboardinputField input[type='file']::file-selector-button {
+  margin-right: 12px;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px -4px rgb(79 70 229 / 45%);
+  transition: filter 180ms var(--d-ease);
+}
+
+.DashboardinputField input[type='file']::file-selector-button:hover {
+  filter: brightness(1.08);
+}
+
+/* ---------- Job description ---------- */
+.Dashboardjobdsc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--d-radius-md);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  min-width: 0;
+}
+
+.Dashboardjobdsc textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  min-height: 180px;
+  border-radius: var(--d-radius-sm);
+  border: 1px solid var(--d-border);
+  background: var(--d-surface);
+  color: var(--d-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  transition:
+    border-color 180ms var(--d-ease),
+    box-shadow 180ms var(--d-ease);
+}
+
+.Dashboardjobdsc textarea::placeholder {
+  color: var(--d-text-soft);
+}
+
+.Dashboardjobdsc textarea:hover {
+  border-color: var(--d-border-strong);
+}
+
+.Dashboardjobdsc textarea:focus {
+  outline: none;
+  border-color: var(--d-accent);
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 15%);
+}
+
+/* ---------- Analyse button ---------- */
+.analysebutton {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 160px;
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    0 6px 16px -4px rgb(79 70 229 / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+  transition:
+    transform 180ms var(--d-ease),
+    box-shadow 180ms var(--d-ease),
+    filter 180ms var(--d-ease);
+}
+
+.analysebutton:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 26px -8px rgb(79 70 229 / 55%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.analysebutton:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px -4px rgb(79 70 229 / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+/* ============================================================
+   RIGHT COLUMN
+   ============================================================ */
+.DashboardRight {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* ---------- Profile / AI card ---------- */
+.DashboardrighttopCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 24px 24px;
+  border-radius: var(--d-radius-lg);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(99 102 241 / 12%), transparent 60%),
+    var(--d-surface);
+  border: 1px solid var(--d-border);
+  box-shadow: var(--d-shadow-md);
+  text-align: center;
+}
+
+.DashboardrighttopCard > div:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--d-accent-soft);
+  border: 1px solid rgb(99 102 241 / 22%);
+  color: var(--d-accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.DashboardrighttopCard > div:first-child::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 22%);
+}
+
+.DashboardProfileImg {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-top: 6px;
+  border: 3px solid var(--d-surface);
+  box-shadow:
+    0 0 0 3px rgb(99 102 241 / 30%),
+    0 10px 24px -8px rgb(15 23 42 / 30%);
+}
+
+.DashboardrighttopCard h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--d-text);
+}
+
+/* ---------- Result card ---------- */
+.DashboardrightBottomCard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: var(--d-radius-lg);
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  box-shadow: var(--d-shadow-md);
+  min-width: 0;
+}
+
+.DashboardrightBottomCard > div:first-child {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--d-text-muted);
+}
+
+/* ---------- Percentage block ---------- */
+.Dashboarpercent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border-radius: var(--d-radius-md);
+  background: linear-gradient(135deg, rgb(99 102 241 / 9%), rgb(139 92 246 / 9%));
+  border: 1px solid rgb(99 102 241 / 18%);
+}
+
+.Dashboarpercent h1 {
+  margin: 0;
+  padding: 2px 0;
+  font-size: clamp(40px, 4.8vw, 52px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.Dashboarpercent > div {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  color: var(--d-accent);
+  box-shadow: var(--d-shadow-sm);
+}
+
+.Dashboarpercent > div svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* ---------- Feedback ---------- */
+.DashboarResumeresultdesc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--d-radius-md);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+}
+
+.DashboarResumeresultdesc b {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--d-accent-strong);
+}
+
+.DashboarResumeresultdesc p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--d-text-muted);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 1100px) {
+  .Dashboard {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 22px;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .Dashboard {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .DashboardRight {
+    order: 2; /* keep results below the form on mobile */
+  }
+
+  .Dashboardheaderlargetitle {
+    font-size: 28px;
+  }
+
+  .alertInfo {
+    padding: 20px;
+  }
+
+  .analysebutton {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .Dashboard {
+    padding: 16px;
+  }
+
+  .Dashboardheaderlargetitle {
+    font-size: 24px;
+  }
+
+  .DashboardrighttopCard,
+  .DashboardrightBottomCard {
+    padding: 20px;
+  }
+
+  .Dashboarpercent {
+    padding: 16px;
+  }
+}
+
+/* ============================================================
+   Preferences
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .DashboardUploadResume,
+  .Dashboardjobdsc textarea,
+  .DashboardinputField input[type='file'],
+  .analysebutton {
+    transition: none;
+  }
+
+  .analysebutton:hover {
+    transform: none;
+  }
+}
+
+
+/* Explicit instruction styles */
+.instructionHeading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--d-radius-sm);
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fcd34d;
+  color: #78350f;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.instructionNote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--d-radius-sm);
+  background: var(--d-surface-alt);
+  border: 1px solid var(--d-border);
+  color: var(--d-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Keep upload and description sections at full width */
+.DashboardUploadResume,
+.Dashboardjobdsc {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Real button states */
+.analysebutton {
+  font-family: inherit;
+}
+
+.analysebutton:focus-visible {
+  outline: 3px solid rgb(99 102 241 / 40%);
+  outline-offset: 3px;
+}
+
+.analysebutton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.analysebutton:disabled:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
