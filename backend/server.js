@@ -4,6 +4,7 @@ const express = require("express");
 const cors=require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth.routes");
+const resume = require("./routes/resume.routes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", resume);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

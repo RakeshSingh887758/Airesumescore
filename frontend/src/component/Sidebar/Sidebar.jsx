@@ -1,8 +1,6 @@
-
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import styles from "./Sidebar.module.css";
 import LogoutDialog from "../LogoutDialog/LogoutDialog";
 import { useAuth } from "../../context/AuthContext";
 
@@ -17,6 +15,9 @@ const NAV_ITEMS = [
   { label: "History", icon: HIstoryIcon, href: "/history" },
   { label: "Admin", icon: AdminIcon, href: "/admin" },
 ];
+
+// Small helper to join conditional class names.
+const cx = (...classes) => classes.filter(Boolean).join(" ");
 
 const Sidebar = ({
   activePath,
@@ -141,12 +142,31 @@ const Sidebar = ({
 
   const hideTooltip = () => setTooltip(null);
 
+  // ---- Shared Tailwind class sets ----
+  // "md:" variants only apply on desktop, so the mobile drawer always shows full labels.
+  const hideWhenCollapsed = collapsed ? "md:hidden" : "";
+
+  const navLabelClass = cx(
+    "truncate text-sm font-medium",
+    hideWhenCollapsed
+  );
+
+  const navIconClass =
+    "flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-5 [&>svg]:w-5";
+
+  const itemBaseClass = cx(
+    "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5",
+    "transition-colors duration-150",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
+    collapsed && "md:justify-center md:px-0"
+  );
+
   return (
     <>
       <button
         ref={toggleRef}
         type="button"
-        className={styles.mobileToggle}
+        className="fixed left-4 top-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 md:hidden [&>svg]:h-5 [&>svg]:w-5"
         onClick={() => setMobileOpen(true)}
         aria-expanded={mobileOpen}
         aria-controls="app-sidebar"
@@ -165,7 +185,7 @@ const Sidebar = ({
 
       {mobileOpen && (
         <div
-          className={styles.backdrop}
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm md:hidden"
           onClick={closeMobile}
           aria-hidden="true"
         />
@@ -174,22 +194,29 @@ const Sidebar = ({
       <aside
         id="app-sidebar"
         ref={panelRef}
-        className={[
-          styles.sidebar,
-          collapsed ? styles.collapsed : "",
-          mobileOpen ? styles.open : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
+        className={cx(
+          "fixed inset-y-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-slate-200 bg-white shadow-xl",
+          "transition-[width,transform] duration-300 ease-in-out",
+          "md:translate-x-0 md:shadow-none",
+          collapsed ? "md:w-20" : "md:w-64",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
         <button
           type="button"
-          className={styles.collapseToggle}
+          className="absolute -right-3 top-8 z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 md:flex [&>svg]:h-3.5 [&>svg]:w-3.5"
           onClick={toggleCollapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!collapsed}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className={cx(
+              "transition-transform duration-300",
+              collapsed && "rotate-180"
+            )}
+          >
             <path
               d="M14 6l-6 6 6 6"
               fill="none"
@@ -203,38 +230,56 @@ const Sidebar = ({
 
         <Link
           to="/dashboard"
-          className={styles.brand}
+          className={cx(
+            "flex items-center gap-3 px-5 pb-4 pt-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500",
+            collapsed && "md:justify-center md:px-0"
+          )}
           aria-label="Resume Screening — go to dashboard"
           onClick={closeMobile}
         >
-          <span className={styles.brandIcon} aria-hidden="true">
+          <span
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 [&>svg]:h-5 [&>svg]:w-5"
+            aria-hidden="true"
+          >
             <DocumentIcon />
           </span>
 
-          <span className={styles.brandText}>
-            <span className={styles.brandTitle}>
+          <span className={cx("flex min-w-0 flex-col", hideWhenCollapsed)}>
+            <span className="truncate text-base font-bold leading-tight text-slate-900">
               Resume Screening
             </span>
-            <span className={styles.brandSubtitle}>
+            <span className="text-[10px] font-semibold tracking-[0.15em] text-slate-400">
               SMART RECRUITMENT
             </span>
           </span>
         </Link>
 
         {user && (
-          <div className={styles.userInfo}>
-            <span className={styles.navLabel}>{user.name}</span>
+          <div
+            className={cx(
+              "mx-4 mb-3 rounded-lg bg-slate-50 px-3 py-2 text-slate-700",
+              hideWhenCollapsed
+            )}
+          >
+            <span className={navLabelClass}>{user.name}</span>
           </div>
         )}
 
-        <div className={styles.divider} />
+        <div className="mx-4 h-px bg-slate-200" />
 
         <nav
-          className={styles.navigation}
+          className="flex-1 space-y-1 overflow-y-auto px-3 py-4"
           aria-label="Workspace"
           onScroll={hideTooltip}
         >
-          <p className={styles.sectionLabel}>WORKSPACE</p>
+          <p
+            className={cx(
+              "px-3 pb-2 text-[11px] font-semibold tracking-wider text-slate-400",
+              hideWhenCollapsed
+            )}
+          >
+            WORKSPACE
+          </p>
 
           {navItems.map(({ label, icon: Icon, href, badge }) => (
             <NavLink
@@ -242,8 +287,12 @@ const Sidebar = ({
               to={href}
               end={href === "/dashboard"}
               className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ""
-                }`
+                cx(
+                  itemBaseClass,
+                  isActive
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                )
               }
               onPointerEnter={(event) =>
                 showTooltip(event, label)
@@ -255,19 +304,27 @@ const Sidebar = ({
             >
               {({ isActive }) => (
                 <>
-                  <span className={styles.navIcon} aria-hidden="true">
+                  <span className={navIconClass} aria-hidden="true">
                     <Icon />
                   </span>
 
-                  <span className={styles.navLabel}>{label}</span>
+                  <span className={navLabelClass}>{label}</span>
 
                   {badge != null && (
-                    <span className={styles.badge}>{badge}</span>
+                    <span
+                      className={cx(
+                        "ml-auto rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700",
+                        collapsed &&
+                          "md:absolute md:right-1 md:top-0.5 md:ml-0 md:px-1.5 md:text-[10px]"
+                      )}
+                    >
+                      {badge}
+                    </span>
                   )}
 
                   {isActive && (
                     <span
-                      className={styles.activeIndicator}
+                      className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-indigo-600"
                       aria-hidden="true"
                     />
                   )}
@@ -277,12 +334,15 @@ const Sidebar = ({
           ))}
         </nav>
 
-        <div className={styles.sidebarBottom}>
-          <div className={styles.bottomDivider} />
+        <div className="mt-auto px-3 pb-5">
+          <div className="mb-3 h-px bg-slate-200" />
 
           <button
             type="button"
-            className={styles.logoutButton}
+            className={cx(
+              itemBaseClass,
+              "text-slate-600 hover:bg-red-50 hover:text-red-600"
+            )}
             onClick={() => setLogoutOpen(true)}
             onPointerEnter={(event) =>
               showTooltip(event, "Logout")
@@ -293,11 +353,11 @@ const Sidebar = ({
             }
             onBlur={hideTooltip}
           >
-            <span className={styles.navIcon} aria-hidden="true">
+            <span className={navIconClass} aria-hidden="true">
               <LogoutIcon />
             </span>
 
-            <span className={styles.navLabel}>Logout</span>
+            <span className={navLabelClass}>Logout</span>
           </button>
         </div>
       </aside>
@@ -312,7 +372,7 @@ const Sidebar = ({
 
       {tooltip && (
         <div
-          className={styles.tooltip}
+          className="pointer-events-none fixed z-[60] whitespace-nowrap rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
           role="tooltip"
           style={{
             top: tooltip.top,
