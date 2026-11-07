@@ -4,16 +4,16 @@ import AppLayout from "./component/AppLayout/AppLayout";
 import Dashboard from "./component/pages/Dashboard/Dashboard";
 import History from "./component/pages/History/History";
 import Admin from "./component/pages/Admin/Admin";
+import LoginPage from "./component/Login/Login";
+import RegisterPage from "./component/Register/Register";
+import ForgotPasswordPage from "./component/ForgotPassword/forgotPassword";
+import ResetPasswordPage from "./component/ResetPassword/resetPassword";
 
 import { useAuth } from "./context/AuthContext";
 import {
   GuestRoute,
   ProtectedRoute,
 } from "./routes/AuthRoutes";
-import LoginPage from "./component/Login/Login";
-import RegisterPage from "./component/Register/Register";
-import ForgotPasswordPage from "./component/ForgotPassword/ForgotPassword";
-import ResetPasswordPage from "./component/ResetPassword/ResetPassword";
 
 function App() {
   const { token, loading } = useAuth();

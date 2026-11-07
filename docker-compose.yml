@@ -1,0 +1,61 @@
+services:
+
+  # React + Vite Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Node.js Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: node-backend
+
+    env_file:
+      - ./.env
+
+    environment:
+      PORT: "5000"
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongo:27017/ai_resume
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+  # MongoDB Database
+  mongo:
+    image: mongo:8
+    container_name: mongodb
+
+    volumes:
+      - mongodb_data:/data/db
+
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "db.adminCommand('ping').ok"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:

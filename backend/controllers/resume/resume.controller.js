@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Resume = require("../../models/resume");
-const extractPdfText = require("../../utils/extractPdfText");
+const extractPdfText = require("../../utils/extractpdftext");
 const { analyzeResume } = require("../../utils/Resumeanalyzer");
 
 const MIN_JD_LENGTH = 50;

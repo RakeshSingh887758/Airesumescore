@@ -98,3 +98,14 @@ Desktop.ini
 *.temp
 *.pid
 *.seed
+
+
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+.DS_Store
+npm-debug.log
+coverage/
